@@ -1,6 +1,6 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { MediaChange, MediaObserver } from '@angular/flex-layout';
-import { filter, map } from 'rxjs/operators';
+import { filter, map, tap } from 'rxjs/operators';
 import { SubSink } from 'subsink';
 
 @Component({
@@ -30,6 +30,7 @@ export class FlexLayoutApiComponent implements OnInit, OnDestroy {
     this.sub.sink = this.obsMedia
       .asObservable()
       .pipe(
+        tap((changes) => console.log(changes)),
         filter((changes: MediaChange[]) => changes.length > 0),
         map((changes: MediaChange[]) => changes[0])
       )
