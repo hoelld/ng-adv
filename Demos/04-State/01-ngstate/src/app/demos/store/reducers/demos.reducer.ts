@@ -20,15 +20,18 @@ export const demosFeatureKey = 'demos';
 export interface DemoState extends EntityState<DemoItem> {
   selected: DemoItem;
   filter: string;
+  editorVisible: boolean;
 }
 
-export const demosAdapter: EntityAdapter<DemoItem> = createEntityAdapter<
-  DemoItem
->();
+export const demosAdapter: EntityAdapter<DemoItem> =
+  createEntityAdapter<DemoItem>();
 
 export const defaultDemoItemState: DemoState = {
+  // entity adapter
   ids: [],
   entities: {},
+  // props
+  editorVisible: false,
   filter: '',
   selected: {
     id: 0,
@@ -64,6 +67,9 @@ export function DemosReducer(
     }
     case DemosActionTypes.DeleteDemoError: {
       return { ...state };
+    }
+    case DemosActionTypes.ToggleEditor: {
+      return { ...state, editorVisible: !state.editorVisible };
     }
     case DemosActionTypes.SetSelected: {
       return { ...state, selected: action.payload as DemoItem };

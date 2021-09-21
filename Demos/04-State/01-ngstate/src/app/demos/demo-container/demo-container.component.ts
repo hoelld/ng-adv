@@ -28,9 +28,10 @@ export class DemoContainerComponent implements OnInit {
   current: DemoItem = this.demos$ != null ? this.demos$[0] : null;
   menuVisible$ = this.mf.sideNavVisible;
   menuPosition$ = this.mf.sideNavPosition;
-  showEditor$ = this.eb.Commands.pipe(
-    map((action) => (action === SidebarActions.HIDE_MARKDOWN ? false : true))
-  );
+  // showEditor$ = this.eb.Commands.pipe(
+  //   map((action) => (action === SidebarActions.HIDE_MARKDOWN ? false : true))
+  // );
+  showEditor$ = this.df.getEditorVisible();
 
   ngOnInit() {
     this.df.initData();

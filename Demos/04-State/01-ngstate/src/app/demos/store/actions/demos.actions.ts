@@ -11,6 +11,11 @@ export enum DemosActionTypes {
   ToggleVisiblity = '[Demos] ToggleVisiblity',
   SetSelected = '[Demos] SetSelected',
   ApplyFilter = '[Demos] ApplyFilter',
+  ToggleEditor = '[Demos] Toggle Editor',
+}
+
+export class ToggleEditor implements Action {
+  readonly type = DemosActionTypes.ToggleEditor;
 }
 
 export class LoadDemos implements Action {
@@ -66,4 +71,5 @@ export type DemosActions =
   | DeleteDemoError
   | ToggleVisiblity
   | SetSelected
-  | ApplyFilter;
+  | ApplyFilter
+  | ToggleEditor;

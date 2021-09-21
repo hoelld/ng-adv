@@ -17,12 +17,13 @@ export const getSelected = createSelector(
   (state: DemoState) => state.selected
 );
 
+export const getEditorVisible = createSelector(
+  getDemoState,
+  (state: DemoState) => state.editorVisible
+);
+
 // Note: Default Selectors provided by Entity
-export const {
-  selectAll,
-  selectEntities,
-  selectIds,
-  selectTotal,
-} = demosAdapter.getSelectors();
+export const { selectAll, selectEntities, selectIds, selectTotal } =
+  demosAdapter.getSelectors();
 
 export const getAllDemos = createSelector(getDemoState, selectAll);
