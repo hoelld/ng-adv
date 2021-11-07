@@ -48,7 +48,7 @@ export interface Book {
 Add book service in books/model/books.service.ts
 
 ```
-ng g s books/model/books --skipTests
+ng g s books/model/books --skip-tests
 ```
 
 initial code:
@@ -93,7 +93,7 @@ Install ngrx Entity if not already done
 # Add reducer with creator
 
 ```
-> ng g r books/store/books --skipTests --group=false --api=true --creators=true  --module books
+> ng g r books/store/books --skip-tests --group=false --api=true --creators=true  --module books
 CREATE src/app/books/store/books.reducer.ts (231 bytes)
 ```
 

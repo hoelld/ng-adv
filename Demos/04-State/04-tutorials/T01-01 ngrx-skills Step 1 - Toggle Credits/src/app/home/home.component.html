@@ -1,0 +1,9 @@
+<div>
+    <h1>Skills Home</h1>
+    
+    <button (click)="toggleCredits()">Toggle Credits</button>
+
+    <div *ngIf="creditsVisible$ | async">
+        CREDITS
+    </div>
+</div>

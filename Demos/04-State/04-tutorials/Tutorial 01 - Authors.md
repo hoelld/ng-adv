@@ -9,6 +9,10 @@ In this tutorial we develop a very simple skills list.
 
 This part of the Tutorial implements the first step
 
+- There are two optional parts:
+Tutorial 03 - Books uses Entity Adapter
+Tutorial 04 - Videos uses Entity Data
+
 # Installation:
 
 Create a new Project Called `ngrx-skills` and open it in VS Code
@@ -37,6 +41,64 @@ UPDATE angular.json (3756 bytes)
 ```
 
 > Note: Answer the question "Do you want to use @ngrx/schematics as the default collection" with yes
+
+
+## Remark about Versions of angular and ngrx:
+
+If there is a new angular version, the ngrx are not yet up to date, and there may be dependencies that will not work. Normally there is a beta version of ngrx if there is a new angluar version that fits the needs.
+
+Think of a angular version 13 is fresh out of the box two days ago, and there is no ngrx 13 ready.
+Then your package json shoul look like the following:
+
+```json
+{
+  "name": "ngrx-skills",
+  "version": "0.0.0",
+  "scripts": {
+    "ng": "ng",
+    "start": "ng serve",
+    "build": "ng build",
+    "watch": "ng build --watch --configuration development",
+    "test": "ng test"
+  },
+  "private": true,
+  "dependencies": {
+    "@angular/animations": "~13.0.0",
+    "@angular/common": "~13.0.0",
+    "@angular/compiler": "~13.0.0",
+    "@angular/core": "~13.0.0",
+    "@angular/forms": "~13.0.0",
+    "@angular/platform-browser": "~13.0.0",
+    "@angular/platform-browser-dynamic": "~13.0.0",
+    "@angular/router": "~13.0.0",
+    "@ngrx/effects": "^13.0.0-beta.0",
+    "@ngrx/entity": "^13.0.0-beta.0",
+    "@ngrx/store": "^13.0.0-beta.0",
+    "rxjs": "~6.6.0",
+    "tslib": "^2.3.0",
+    "zone.js": "~0.11.4"
+  },
+  "devDependencies": {
+    "@angular-devkit/build-angular": "^13.0.1",
+    "@angular/cli": "~13.0.1",
+    "@angular/compiler-cli": "~13.0.0",
+    "@ngrx/schematics": "^13.0.0-beta.0",
+    "@ngrx/store-devtools": "^13.0.0-beta.0",
+    "@types/jasmine": "~3.8.0",
+    "@types/node": "^12.11.1",
+    "jasmine-core": "~3.8.0",
+    "karma": "~6.3.0",
+    "karma-chrome-launcher": "~3.1.0",
+    "karma-coverage": "~2.0.3",
+    "karma-jasmine": "~4.0.0",
+    "karma-jasmine-html-reporter": "~1.7.0",
+    "typescript": "~4.4.4"
+  }
+}
+```
+
+To force this please remove the ```node_modules``` folder and do ```npm i``` again
+
 
 # Schematics Overview
 
@@ -101,7 +163,7 @@ StoreModule.forRoot(reducers, {
 Do not pollute the global state - build a separate state for App main data
 
 ```
-> ng g r store/app --skipTests --group=false --api=false --creators=false  
+> ng g r store/app --skip-tests --group=false --api=false --creators=false  
 CREATE src/app/store/app.reducer.ts (284 bytes)
 ```
 
@@ -146,7 +208,7 @@ export interface State {
   [appFeatureKey]: AppState;
 }
 
-export const reducers: ActionReducerMap<State> = {
+export const reducers: ActionReducerMap<State, Action> = {
   [appFeatureKey]: AppReducer,
 };
 ```
@@ -156,31 +218,7 @@ export const reducers: ActionReducerMap<State> = {
 Add a home component
 
 ```
-ng g c home --skipTests 
-```
-
-Add [Angular Flex Layout](https://github.com/angular/flex-layout)
-
-```
-npm i -s @angular/flex-layout @angular/cdk
-```
-
-Import Angular Flex Layout to app.module
-
-```typescript
-. . .
-import { FlexLayoutModule } from '@angular/flex-layout';
-
-@NgModule({
-  declarations: [
-    AppComponent,
-    HomeComponent
-  ],
-  imports: [
-    BrowserModule,
-    AppRoutingModule,
-    FlexLayoutModule, 
-    . . .
+ng g c home --skip-tests 
 ```
 
 Clean the app.component.html and set the app-home component as content
@@ -188,10 +226,10 @@ Clean the app.component.html and set the app-home component as content
 Add to `home.component.html`, also implement an empty `toggleCredits()` in the \*.ts
 
 ```html
-<div fxLayout="column" fxLayoutAlign="center center">
+<div>
   <h1>Skills Home</h1>
 
-  <button mat-raised-button (click)="toggleCredits()">Toggle Credits</button>
+  <button (click)="toggleCredits()">Toggle Credits</button>
 </div>
 ```
 
@@ -200,10 +238,20 @@ Add to `home.component.html`, also implement an empty `toggleCredits()` in the \
   }
 ```
 
+Later on we will use this button to toggle the credits in and out into the view.
+We will do this by using actions, reducers, state and selectors.
+
+
 # Add Actions
 
+We will use only one file for all actions - in real world projects you may have a own folder with mutliple action files in it. Each of the action files can have multiple actions for a specific need inside of it.
+
+Therefore the generator does not exactly what we want - you have to edit the generated file to fit our needs. 
+
+If you are prompted for a prefix just press enter without any input.
+
 ```
-> ng g action store/app --group=false --creators=false --skipTests --api=false
+> ng g action store/app --group=false --creators=false --skip-tests --api=false
 ```
 
 Edit the new actions file
@@ -228,7 +276,7 @@ export type AppActions = AppToggleCredits;
 # Add Selector
 
 ```
-> ng g selector store/app --group=false --skipTests
+> ng g selector store/app --group=false --skip-tests
 ```
 
 Edit the new selectors file.
@@ -236,7 +284,7 @@ Edit the new selectors file.
 we need a general selector to access the app State from the global state - and then feature specific detail selectors.
 
 
-```
+```typescript
 import { createFeatureSelector, createSelector } from '@ngrx/store';
 
 import { AppState, appFeatureKey } from './app.reducer';
@@ -258,10 +306,10 @@ import { AppActions, AppActionTypes } from './app.actions';
 . . .
 
 
-export function reducer(state = initialState, action: AppActions): AppState {
+export function reducer(state = initialState, action: Action): AppState {
   switch (action.type) {
     case AppActionTypes.AppToggleCredits:
-      return { ...state, creditsVisible: !state.creditsVisible };
+      return { ...state, creditsVisible: !state.creditsVisible}
     default:
       return state;
   }
@@ -273,20 +321,21 @@ If the "business logic" is harder to implement, extract it to a separate pure fu
 or even in separate files / folders
 
 
-```
+```typescript
 . . .
 
-export function reducer(state = initialState, action: AppActions): AppState {
+export function reducer(state = initialState, action: Action): AppState {
   switch (action.type) {
-    case AppActionTypes.ToggleCredits:
-      return AppToggleCreditsActionImplementation(state,action);
+    case AppActionTypes.AppToggleCredits:
+      // return { ...state, creditsVisible: !state.creditsVisible}
+      return AppToggleCreditsActionImplementation(state, action)
     default:
       return state;
   }
 }
 
 
-function AppToggleCreditsActionImplementation(state:AppState, action: AppActions): AppState {
+function AppToggleCreditsActionImplementation(state:AppState, action: Action): AppState {
   // Business Logic
   return { ...state, creditsVisible: !state.creditsVisible };
 }
@@ -296,6 +345,11 @@ function AppToggleCreditsActionImplementation(state:AppState, action: AppActions
 # Use ngrx in Components
 
 Open home.component.ts
+
+Inject the store into the component in the constructor
+Use the selector to get an observable
+Dispatch the Action in the toggleCredits function
+
 
 ```typescript
 import { Component, OnInit } from '@angular/core';
@@ -345,9 +399,28 @@ Install Redux DevTools Chrome Browser Extension and view the Actions and State D
 
 # Lab "menueVisible"
 
+Like the credits add a menu and a new button to the home component
+
+```html
+<button>Toggle Menu</button>
+<div>Menu</div>
+```
+
 Modify app actions, reducer and selector files to add a flag 'menuVisible'.
+Modify the home component to toggle the menu by actions when the new button is clicked.
+
+TIP : You can export multiple action types by concatenation with the | Operator:
+
+
+```typescript
+. . .
+export type AppActions = AppToggleCredits | AppToggleMenu
+. . .
+```
 
 Time about 20 Min.
+
+If you have time left, make it prettier
 
 
 # Effects
@@ -462,7 +535,7 @@ Implement success action
 
     // Authors
     case AppActionTypes.AppLoadAuthorsSuccess:
-      return AppLoadAuthorsSuccessImplementation(state, action);
+      return AppLoadAuthorsSuccessImplementation(state, action as AppLoadAuthorsSuccess);
 
 
     . . .
@@ -470,7 +543,7 @@ Implement success action
 
 function AppLoadAuthorsSuccessImplementation(
   state: AppState,
-  {authors}
+  {authors}:AppLoadAuthorsSuccess
 ): AppState {
   // Business Logic
   return { ...state, authors };
@@ -481,7 +554,7 @@ function AppLoadAuthorsSuccessImplementation(
 ## Authors Service
 
 ```
- ng g s model/authors --skipTests
+ ng g s model/authors --skip-tests
 ```
 
 ```typescript
@@ -518,12 +591,16 @@ Creating Effects modify the app.module!
 It must be saved before this step.
 
 ```
-> ng g ef store/app --skipTests --group=false --module=. --creators=false --api=false --root=true
+> ng g ef store/app --skip-tests --group=false --module=. --creators=false --api=false --root=true
 CREATE src/app/store/effects/app.effects.ts (186 bytes)
 UPDATE src/app/app.module.ts (1140 bytes)
 ```
 
 check the app.module file if the effect is created "forRoot":
+
+Again there is a question for the prefix as it was before.
+And again it is not exactly what we need - but lets modify for our simple sample.
+
 
 ```typescript
       . . .
@@ -546,21 +623,24 @@ import { AppActionTypes, AppLoadAuthorsFailure, AppLoadAuthorsSuccess } from './
 
 @Injectable()
 export class AppEffects {
-  constructor(private actions$: Actions, private auts: AuthorService) {}
+  constructor(private actions$: Actions, private auts: AuthorsService) {}
 
   @Effect()
   loadAuthor$: Observable<Action> = this.actions$.pipe(
-    ofType(AppActionTypes.LoadAuthors),
+    ofType(AppActionTypes.AppLoadAuthors),
     mergeMap((action) =>
       this.auts.getAuthors().pipe(
-        map((authors: Author[]) => new LoadAuthorsSuccess(authors)),
-        catchError((err) => of(new LoadAuthorsFailure(err)))
+        map((authors: Author[]) => new AppLoadAuthorsSuccess(authors)),
+        catchError((err) => of(new AppLoadAuthorsFailure(err)))
       )
     )
   );
 }
 ```
 
+REMARK 1: the @Effect() decorator is deprecated - there is a simpler method to create effects - we will use the simpler method in tutorial 02.
+
+REMARK 2:
 Other possibilities for the mapping are all flattening operators like exhaustMap, concatMap, ...
 In this case a mergeMap will work fine - but often exhaustMap is used.
 exhaustMap waits until the service is completed to deliver the resulting Observable.
@@ -570,7 +650,7 @@ For more information about exhaustMap [follow this link](https://www.learnrxjs.i
 ## Add an authors list & add it to `home.component.ts`:
 
 ```
-ng g c authors/authors-list -m app --flat --skipTests 
+ng g c authors/authors-list -m app --flat --skip-tests 
 
 CREATE src/app/authors/authors-list.component.html (27 bytes)
 CREATE src/app/authors/authors-list.component.ts (299 bytes)
@@ -581,9 +661,9 @@ UPDATE src/app/app.module.ts (1239 bytes)
 Add the following html & \*.ts:
 
 ```html
-<div fxLayout="column" fxLayoutAlign="center center" fxLayoutGap="16px">
+<div>
   <h2>Credits:</h2>
-  <div *ngFor="let a of authors | async">{{ a.mail }}</div>
+  <div *ngFor="let a of authors$ | async">{{ a.mail }}</div>
 </div>
 ```
 
@@ -598,7 +678,7 @@ import { getAppAuthors } from '../store/app.selectors';
 
 export class AuthorsListComponent implements OnInit {
   constructor(private store: Store<AppState>) {}
-  authors = this.store.select(getAppAuthors);
+  authors$ = this.store.select(getAppAuthors);
 
   ngOnInit(): void {
     this.store.dispatch(new AppLoadAuthors());
@@ -609,15 +689,14 @@ export class AuthorsListComponent implements OnInit {
 Replace the HTML in home.components.html:
 
 ```html
-<div
-  *ngIf="creditsVisible$ | async"
-  fxLayout="column"
-  fxLayoutAlign="center center"
-  fxLayoutGap="16px"
->
+<div *ngIf="creditsVisible$ | async">
   <div><app-authors-list></app-authors-list></div>
 </div>
 ```
+
+## Run the app
+
+Do not forget to run json-server first
 
 ## Lab Failure Management 
 
@@ -757,6 +836,13 @@ Open file authors-list.component.html
 <ng-template #isLoadingIndicator>
 	<div>Loading!!!!</div>
 </ng-template>
+```
+
+REMARK: The json server allows to configure a delay 
+
+
+```bash
+json-server db.json -d 2000
 ```
 
 ## Discussion

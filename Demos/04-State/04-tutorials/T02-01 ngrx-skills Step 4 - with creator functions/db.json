@@ -1,0 +1,69 @@
+{
+  "authors": [
+    {
+      "id": 1,
+      "mail": "alexander.pajer@integrations.at"
+    },
+    {
+      "id": 2,
+      "mail": "alengauer.training@gmail.com"
+    }
+  ],
+  "skills": [
+    {
+      "id": "123",
+      "name": "rxjs",
+      "completed": true
+    },
+    {
+      "id": "456",
+      "name": "ngrx",
+      "completed": false
+    },
+    {
+      "id": "WP5uUk4",
+      "name": "New Skill",
+      "completed": false
+    },
+    {
+      "id": "dnXKMHN",
+      "name": "New Skill",
+      "completed": false
+    },
+    {
+      "id": "UaGwJAI",
+      "name": "New Skill",
+      "completed": false
+    },
+    {
+      "id": "SiQpJeh",
+      "name": "New Skill",
+      "completed": false
+    },
+    {
+      "id": "WJQWG8k",
+      "name": "New Skill",
+      "completed": false
+    },
+    {
+      "id": "CULj6lZ",
+      "name": "New Skill",
+      "completed": false
+    },
+    {
+      "id": "l_e1vmk",
+      "name": "New Skill",
+      "completed": false
+    },
+    {
+      "id": "sek4FJB",
+      "name": "New Skill",
+      "completed": false
+    },
+    {
+      "id": "BUrohTg",
+      "name": "New Skill",
+      "completed": false
+    }
+  ]
+}

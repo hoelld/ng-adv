@@ -8,31 +8,19 @@ In this tutorial we develop a very simple skills list.
 - In the first step we use ngrx to toggle the list of authors of the tutorial
 - In the second step we add a lazy loaded feature module with own nrgx state to show the skills list
 
-
 This part of the Tutorial implements the second step
 
+- There are two optional parts:
+Tutorial 03 - Books uses Entity Adapter
+Tutorial 04 - Videos uses Entity Data
 
 # Preparation for Lazy Loaded Feature Module with NgRx Entity, Facades and Creator Functions
 
-Creator Functions:
+## Add Backend Data
 
-- createAction
-- createEffect
-- createReducer
+Add Skills Data to db.json
+Be aware to restart json server after that change.
 
-Add skills module
-
-```
-ng g module skills --route skills --module app.module.ts 
-``` 
-
-Add [Angular Flex Layout](https://github.com/angular/flex-layout)
-
-```
-npm i -s @angular/flex-layout @angular/cdk
-```
-
-Add Skills Data to db.json & create a skill.model.ts:
 
 ```json
 "skills": [
@@ -41,11 +29,21 @@ Add Skills Data to db.json & create a skill.model.ts:
 ]
 ```
 
+## New Module skills
+
+Add skills module
+
+```
+ng g module skills --route skills --module app.module.ts 
+``` 
+
+## Extend Menu and set Router Outlet
 
 Open "home/home.component.html" and add a link to skills
 
 ```html
   <div *ngIf="menuVisible$ | async">
+    Menu:
     <a [routerLink]="['/skills']" >
         Show Skills
     </a>
@@ -62,8 +60,8 @@ Open app.component.html and add router-outlet
 Add skills components
 
 ```
-> ng g c skills/skills-list-with-row --skipTests
-> ng g c skills/skill-row --skipTests
+> ng g c skills/skills-list-with-row --skip-tests
+> ng g c skills/skill-row --skip-tests
 ```
 
 Add skill model in skills/model/skill.model.ts
@@ -79,7 +77,7 @@ export interface Skill {
 Add skill service in skills/model/skills.service.ts
 
 ```
-ng g s skills/model/skills --skipTests
+ng g s skills/model/skills --skip-tests
 ```
 
 initial code:
@@ -120,49 +118,61 @@ See further [docs](https://angular.io/guide/providers#providing-a-service)
 
 Or on [dev.to](https://dev.to/nickraphael/angular-s-providedin-root-what-if-two-lazy-modules-provided-the-same-service-166p)
 
+# Build feature Reducer 
 
-# Add reducer with creator
+We will add the reducer manually.
 
-```
-> ng g r skills/store/skills --skipTests --group=false --api=true --creators=true  --module skills
-CREATE src/app/skills/store/skills.reducer.ts (284 bytes)
-```
+Create file skills/store/skills.reducer.ts
 
-Then add the state skills data.
+```typescript 
+import { createReducer, on } from '@ngrx/store';
+import { Skill } from '../model/skill.model';
 
-Our State should look like this:
+export const skillsFeatureKey = 'skills'
 
-```typescript
-export const skillsFeatureKey = 'skills';
-
-export interface SkillsState {
-  skills: Skill[];
+export interface SkillsFeatureState {
+    skills: Skill[];
 }
 
-export const initialState: SkillsState = {
-  skills: [],
+export const initialState: SkillsFeatureState = {  
+    skills:[],
 };
 
-export const reducer = createReducer(
-  initialState,
+export const skillsFeatureReducer = createReducer(
+    initialState,
 
-);
+); 
+  
 ```
 
+Add the reducer to the Feature Module.
 
-Look at skills/skills.module.ts how the reducer is declared
+```typescript
+@NgModule({
+  declarations: [
+    SkillsComponent,
+    SkillsListWithRowComponent,
+    SkillRowComponent
+  ],
+  imports: [
+    CommonModule,
+    SkillsRoutingModule,
+    StoreModule.forFeature(skillsFeatureKey, skillsFeatureReducer),
+  ]
+})
+export class SkillsModule { }
+```
+
 
 # Add Actions with creator
 
 ```
-> ng g a skills/store/skills --api=true --creators=true --skipTests    
+> ng g a skills/store/skills --api=true --creators=true --skip-tests    
+? What should be the prefix of the action? load
 CREATE src/app/skills/store/skills.actions.ts (347 bytes)
 ```
 
-correct the trailing s in Skillss
-
-Other needed actions can be created using the ngrx-create-action-props code snippets.
-complete code:
+correct the trailing s in Skillss and the data payload
 
 ```typescript
 import { createAction, props } from '@ngrx/store';
@@ -179,8 +189,11 @@ export const loadSkillsFailure = createAction(
   '[Skills] Load Skills Failure',
   props<{ error: Error }>()
 );
+```
 
-// addSkill action -> easy creation using: ngrx-create-action-props
+Add further actions manually
+
+```typescript
 export const addSkill = createAction('[Skills] Add', props<{ skill: Skill }>());
 
 export const addSkillSuccess = createAction(
@@ -195,15 +208,61 @@ export const addSkillFailure = createAction(
 
 ```
 
+# Add Action to reducer
+
+Open skills/store/skills.reducer.ts
+
+the "on" operator from @ngrx/store replaces the switch
+
+```typescript
+
+import { createReducer, on } from '@ngrx/store';
+import { Skill } from '../model/skill.model';
+import { addSkillSuccess, loadSkillsSuccess } from './skills.actions';
+
+export interface SkillsFeatureState {
+    skills: Skill[];
+}
+
+export const initialState: SkillsFeatureState = {  
+    skills:[],
+};
+
+export const skillsFeatureReducer = createReducer(
+    initialState,
+    on(loadSkillsSuccess, (state, { skills }) => ({
+        ...state,
+        skills,
+    })),
+    on(addSkillSuccess, (state, { skill }) => ({
+    ...state,
+    skills: [...state.skills, skill],
+    }))
+); 
+
+
+```
+
+REMARK: 
+Using createReducer before Ivy with AOT (View Engine AOT) in production mode,
+this can cause errors like this: https://angular.io/guide/aot-metadata-errors#function-calls-are-not-supported
+
+Ways around this:
+https://medium.com/@emilyxiong/how-to-use-ngrxs-combinereducers-in-aot-10eae758c495
+https://ngrx.io/api/store/createReducer - At the end of page
+
+
+
 # Skills Effect:
 
 Creating Effects modify the skills.module! 
 It must be saved before this step.
 
 ```
-> ng g ef skills/store/skills --skipTests --group=false --module=skills --creators=true --api=true --root=false
+> ng g ef skills/store/skills --skip-tests --group=false --module=skills --creators=true --api=true --root=false   
+? What should be the prefix of the effect? load
 CREATE src/app/skills/store/skills.effects.ts (195 bytes)
-UPDATE src/app/skills/skills.module.ts (889 bytes)
+UPDATE src/app/skills/skills.module.ts (933 bytes)
 ```
 
 Add the Skills Service to the constructor.
@@ -261,7 +320,7 @@ export class SkillsEffects {
 # Skills Selector
 
 ```
-> ng g selector skills/store/skills --group=false --skipTests          
+> ng g selector skills/store/skills --group=false --skip-tests          
 CREATE src/app/skills/store/skills.selectors.ts (70 bytes)
 ```
 
@@ -269,62 +328,22 @@ Open selector file and implement selector function to get skills
 
 ```typescript
 import { createFeatureSelector, createSelector } from '@ngrx/store';
-import { skillsFeatureKey, SkillsState } from './skills.reducer';
+import { skillsFeatureKey, SkillsFeatureState } from './skills.reducer';
 
-export const getSkillState = createFeatureSelector<SkillsState>(skillsFeatureKey)
+export const getSkillState = createFeatureSelector<SkillsFeatureState>(skillsFeatureKey)
 
 export const getSkills = createSelector(
     getSkillState,
-    (state:SkillsState) => state.skills
+    (state:SkillsFeatureState) => state.skills
 )
 ```
-
-# Extend Skills reducer with the load and add actions
-
-```typescript
-import { Action, createReducer, on } from '@ngrx/store';
-import { Skill } from '../model/skill.model';
-import * as SkillsActions from './skills.actions';
-
-export const skillsFeatureKey = 'skills';
-
-export interface SkillsState {
-  skills: Skill[];
-}
-
-export const initialState: SkillsState = {
-  skills: []
-};
-
-
-export const reducer = createReducer(
-  initialState,
-  on(SkillsActions.loadSkillsSuccess, (state, { skills }) => ({
-    ...state,
-    skills,
-  })),
-  on(SkillsActions.addSkillSuccess, (state, { skill }) => ({
-    ...state,
-    skills: [...state.skills, skill],
-  }))
-);
-
-```
-
-REMARK: 
-Using createReducer before Ivy with AOT (View Engine AOT) in production mode,
-this can cause errors like this: https://angular.io/guide/aot-metadata-errors#function-calls-are-not-supported
-
-Ways around this:
-https://medium.com/@emilyxiong/how-to-use-ngrxs-combinereducers-in-aot-10eae758c495
-https://ngrx.io/api/store/createReducer - At the end of page
 
 # Skills Facade
 
 add new file to store/skills-facade.service.ts
 
 ```
-> ng g s skills/store/skills-facade --skipTests   
+> ng g s skills/store/skills-facade --skip-tests   
 CREATE src/app/skills/store/skills-facade.service.ts (141 bytes)
 ```
 
@@ -335,7 +354,7 @@ import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { Skill } from '../model/skill.model';
 import { addSkill, loadSkills } from './skills.actions';
-import { SkillsState } from './skills.reducer';
+import { SkillsFeatureState } from './skills.reducer';
 import { getSkills } from './skills.selectors';
 
 @Injectable({
@@ -343,7 +362,7 @@ import { getSkills } from './skills.selectors';
 })
 export class SkillsFacadeService {
 
-  constructor(private store:Store<SkillsState>) { }
+  constructor(private store:Store<SkillsFeatureState>) { }
 
   initSkills():void {
     this.store.dispatch(loadSkills())
@@ -360,48 +379,11 @@ export class SkillsFacadeService {
   // ...
 }
 
+
 ```
 
 # Skills List UI
 
-```
-> ng add @angular/material
-```
-
-
-```typescript
-import {MatCardModule} from '@angular/material/card';
-import {MatToolbarModule} from '@angular/material/toolbar';
-import {MatSlideToggleModule} from '@angular/material/slide-toggle';
-import {MatIconModule} from '@angular/material/icon';
-import { FormsModule,ReactiveFormsModule } from '@angular/forms';
-import { FlexLayoutModule, FlexModule } from '@angular/flex-layout';
-
-. . .
-
-@NgModule({
-  declarations: [SkillsComponent, SkillsListWithRowComponent, SkillsRowComponent],
-  imports: [
-    CommonModule,
-    SkillsRoutingModule,
-    
-    FormsModule,
-    ReactiveFormsModule,
-    FlexLayoutModule,
-
-    MatCardModule,
-    MatToolbarModule,
-    MatSlideToggleModule,
-    MatIconModule,
-
-    . . .
-```
-
-on errors reset npm modules
- 
-```
-npm ci 
-```
 
 ## Implement Skill Component
 
@@ -413,25 +395,30 @@ npm ci
 
 ## Implement Skill-Row
 
+File skill-row.component.html
+
+
 ```html
-<div fxLayout="row" fxLayoutAlign="space-between center" fxFlexFill class="row">
-  <div fxFlex="3 1 auto" style="padding-left: 2rem">{{ skill?.name }}</div>
-  <div fxFlex="1 1 140px">
-    <mat-slide-toggle
-      color="primary"
-      (change)="toggleItemCompleted(skill)"
-      [checked]="skill?.completed"
-      >Completed</mat-slide-toggle
-    >
-  </div>
-  <div fxFlex="1 1 80px">
-    <button mat-raised-button color="primary" (click)="deleteItem(skill)">
-      <mat-icon>delete</mat-icon>
-    </button>
-  </div>
+<div class="row">
+    <div style="padding-left: 2rem">{{ skill?.name }}</div>
+    <div>
+        <button onclick="deleteItem(skill)">Delete</button>
+        <button onclick="toggleItemCompleted(skill)">Toggle Complete</button>
+    </div>
 </div>
 ```
 
+File skill-row.component.scss
+
+```css 
+.row {
+    display:flex;
+    min-width: 20rem;
+    justify-content:space-between;
+}
+```
+
+File skill-row.component.ts
 
 ```typescript
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
@@ -443,7 +430,7 @@ import { Skill } from '../model/skill.model';
   styleUrls: ['./skill-row.component.scss'],
 })
 export class SkillRowComponent implements OnInit {
-  @Input() skill: Skill;
+  @Input() skill: Skill = null as unknown as Skill; // typescript strict nonsense
   @Output() itemDeleted: EventEmitter<Skill> = new EventEmitter();
   @Output() itemCompleted: EventEmitter<Skill> = new EventEmitter();
 
@@ -465,41 +452,24 @@ export class SkillRowComponent implements OnInit {
 ## Implement Skills-List
 
 
-\*.html:
+skills-list-with-row.html:
 
 ```html
-<mat-toolbar color="primary">
-  <mat-toolbar-row fxLayoutAlign="space-between center">
-    <div>SPA Skills</div>
-    <div fxLayoutGap="10px">
-      <button mat-raised-button (click)="addItem()">Add</button>
-      <mat-slide-toggle [formControl]="fcToggle" color="accent">
-        ShowAll
-      </mat-slide-toggle>
-    </div>
-  </mat-toolbar-row>
-</mat-toolbar>
-
-<mat-card>
-  <mat-card-content fxLayout="column">
-    <ng-container *ngFor="let sk of view$ | async" class="item">
-      <app-skill-row
-        [skill]="sk"
-        (itemDeleted)="deleteItem($event)"
-        (itemCompleted)="toggleItemComplete($event)"
-      ></app-skill-row>
-    </ng-container>
-  </mat-card-content>
-</mat-card>
+<div>SPA Skills</div>
+<button (click)="addItem()">Add</button>
+<div *ngFor="let sk of skills$ | async" class="item">
+    <app-skill-row
+       [skill]="sk"
+       (itemDeleted)="deleteItem($event)"
+       (itemCompleted)="toggleItemComplete($event)"
+    ></app-skill-row>
+</div>
 ```
 
-\*.ts
+skills-list-with-row.ts
 
 ```typescript
 import { Component, OnInit } from '@angular/core';
-import { FormControl } from '@angular/forms';
-import { combineLatest } from 'rxjs';
-import { map, startWith, tap } from 'rxjs/operators';
 import { Skill } from '../model/skill.model';
 import { SkillsFacadeService } from '../store/skills-facade.service';
 
@@ -511,25 +481,15 @@ import { SkillsFacadeService } from '../store/skills-facade.service';
 export class SkillsListWithRowComponent implements OnInit {
   constructor(private sf: SkillsFacadeService) {}
 
-  skills$ = this.sf.getSkills();
-  // Remove 'true' and it does not work
-  fcToggle = new FormControl(true);
-
-  view$ = combineLatest([
-    this.skills$,
-    this.fcToggle.valueChanges.pipe(startWith(true)),
-  ]).pipe(
-    map(([skills, showAll]) => {
-      return showAll ? skills : skills.filter((sk) => sk.completed === showAll);
-    })
-  );
-
+  skills$ = this.sf.getSkills()
+  sk:Skill[]=[]
+  
   ngOnInit(): void {
-    this.sf.initSkills();
+    this.sf.initSkills(); 
   }
 
   addItem(): void {
-    const newItem: Skill = { id: null, name: 'New Skill', completed: false };
+    const newItem: Skill = { id: 0, name: 'New Skill', completed: false };
     this.sf.addSkill(newItem);
   }
 

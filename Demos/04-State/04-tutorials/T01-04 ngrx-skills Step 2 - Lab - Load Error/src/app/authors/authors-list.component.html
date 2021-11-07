@@ -1,0 +1,7 @@
+<div>
+    <h2>Credits:</h2>
+    <div *ngIf="authorsLoadFailure$ | async">
+        There was an error loading the authors
+    </div>
+    <div *ngFor="let a of authors$ | async">{{ a.mail }}</div>
+  </div>

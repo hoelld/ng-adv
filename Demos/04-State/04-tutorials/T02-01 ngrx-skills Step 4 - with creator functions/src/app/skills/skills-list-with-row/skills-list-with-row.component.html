@@ -1,0 +1,9 @@
+<div>SPA Skills</div>
+<button (click)="addItem()">Add</button>
+<div *ngFor="let sk of skills$ | async" class="item">
+    <app-skill-row
+       [skill]="sk"
+       (itemDeleted)="deleteItem($event)"
+       (itemCompleted)="toggleItemComplete($event)"
+    ></app-skill-row>
+</div>
