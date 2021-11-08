@@ -9,6 +9,7 @@ import { Component, OnInit, ViewEncapsulation } from '@angular/core';
       <app-nested-child></app-nested-child>
     </div>
   `,
+  //encapsulation : ViewEncapsulation.Emulated,
   styles: [
     `
       .divclass {
