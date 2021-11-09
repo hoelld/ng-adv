@@ -152,3 +152,21 @@
 - Building & Deploying an Angular App to Azure Kubernetes Services
 - DevOps Gates using Unit-Tests, UI-Tests & Code Coverage (optional)
 - Implementing Feature Flags / Toggles using LaunchDarkly (optional)
+
+## Further Reading
+
+### CSS
+
+- https://css-tricks.com/snippets/css/a-guide-to-flexbox/
+- https://flexboxfroggy.com/
+- https://cssgridgarden.com/
+
+### Tools
+
+- https://www.sublimetext.com/
+- https://www.npmjs.com/package/json-server#getting-started
+- https://formly.dev/
+
+### Dependency Injection in Ng
+
+- https://blog.thoughtram.io/angular/2015/05/18/dependency-injection-in-angular-2.html
