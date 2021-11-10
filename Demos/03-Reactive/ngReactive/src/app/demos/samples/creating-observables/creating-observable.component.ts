@@ -46,10 +46,15 @@ export class CreatingObservableComponent implements OnInit {
       error: this.onErr,
       complete: this.onComplete,
     });
-  }
+
+    let observable$ = of([1,2,3,4,5]);
+
+    let subs = observable$.subscribe(observer);
+    subs.unsubscribe();
+  } 
 
   useNewObs() {
-    new Observable((observer) => {
+    let myObs$ = new Observable((observer) => {
       let idx = 0;
       const numbers = [2, 5, 9, 12, 22];
 
@@ -64,8 +69,17 @@ export class CreatingObservableComponent implements OnInit {
       };
 
       getNumber();
-    }).subscribe(
-      (data: number) => console.log('useObsCreate: ', data),
+    });
+    
+    // Observable eigentlich singlecast, geht aber trotzdem beide subscriben weil funktion closure
+    myObs$.subscribe(
+      (data: number) => console.log('useObsCreate1: ', data),
+      this.onErr,
+      this.onComplete
+    );
+
+    myObs$.subscribe(
+      (data: number) => console.log('useObsCreate2: ', data),
       this.onErr,
       this.onComplete
     );

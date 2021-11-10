@@ -166,7 +166,20 @@
 - https://www.sublimetext.com/
 - https://www.npmjs.com/package/json-server#getting-started
 - https://formly.dev/
+- https://chrome.google.com/webstore/detail/angular-devtools/
+- log4js
+- Chrome Angular DevTools
 
 ### Dependency Injection in Ng
 
 - https://blog.thoughtram.io/angular/2015/05/18/dependency-injection-in-angular-2.html
+
+### RxJS
+
+- https://thinkrx.io/rxjs/filter/
+- https://www.learnrxjs.io/
+- rxjs-watcher (Chrome Ext + npm package)
+
+### Change Detection
+
+- https://www.mokkapps.de/blog/the-last-guide-for-angular-change-detection-you-will-ever-need/

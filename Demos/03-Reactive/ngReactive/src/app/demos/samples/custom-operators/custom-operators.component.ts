@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Component, OnInit } from '@angular/core';
-import { EMPTY, from } from 'rxjs';
+import { EMPTY, from, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { filterEven } from './filterEven';
 import { getFromApi, logError } from './logErr';
@@ -30,6 +30,7 @@ export class CustomOperatorsComponent implements OnInit {
     const numbers$ = from([1, 4, 6, 7, 9, 11]).pipe(pow(2));
     numbers$.subscribe((n) => console.log(n));
   }
+
 
   usingOperators() {
     const numbers$ = from([1, 4, 6, 7, 9, 11]).pipe(takeEveryNth(3));

@@ -15,10 +15,10 @@ export class SubjectsComponent implements OnInit {
   as$: AsyncSubject<number> = new AsyncSubject();
 
   ngOnInit() {
-    this.runSubjectInit();
+    // this.runSubjectInit();
     // this.runBSubjectInit();
     // this.runRPSubjectInit();
-    // this.runASubjectInit();
+     this.runASubjectInit();
   }
 
   private runSubjectInit() {
@@ -69,6 +69,10 @@ export class SubjectsComponent implements OnInit {
 
   emitNextAS() {
     this.as$.subscribe((val) => console.log('Subsciber Late', val));
+    
+  }
+
+  completeAS() {
     console.log('complete');
     this.as$.complete();
   }
