@@ -165,6 +165,7 @@
 
 - https://www.sublimetext.com/
 - https://www.npmjs.com/package/json-server#getting-started
+  - npx json-server db.json
 - https://formly.dev/
 - https://chrome.google.com/webstore/detail/angular-devtools/
 - log4js
@@ -183,3 +184,7 @@
 ### Change Detection
 
 - https://www.mokkapps.de/blog/the-last-guide-for-angular-change-detection-you-will-ever-need/
+
+### Security
+
+- jwt.io

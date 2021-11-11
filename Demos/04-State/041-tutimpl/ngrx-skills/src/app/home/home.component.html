@@ -1,0 +1,12 @@
+<div>
+    <h1>Skills Home</h1>
+
+    <button (click)="toggleMenu()">Toggle Menu</button>
+    <div *ngIf="menuVisible$ | async">Menu</div>
+
+    <button (click)="toggleCredits()">Toggle Credits</button>
+
+    <div *ngIf="creditsVisible$ | async">
+        <div><app-authors-list></app-authors-list></div>
+      </div>
+</div>
