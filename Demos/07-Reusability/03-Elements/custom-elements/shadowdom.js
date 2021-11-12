@@ -2,7 +2,7 @@
 
 function createShowDOM() {
   var host = document.querySelector("#shadowHost");
-  var shadowRoot = host.createShadowRoot();
+  var shadowRoot = host.attachShadow({mode: 'open'});//host.createShadowRoot();
   var div = document.createElement("div");
   div.textContent = "Can you see me now";
   div.className = "x";
@@ -11,6 +11,6 @@ function createShowDOM() {
 
 function createShadowDomTwo() {
   var host = document.querySelector("#shadowHostTwo");
-  var shadowRoot = host.createShadowRoot();
+  var shadowRoot = host.attachShadow({mode: 'open'});//host.createShadowRoot();
   shadowRoot.appendChild(document.querySelector("#tmpl").content);
 }
