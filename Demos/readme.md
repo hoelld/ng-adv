@@ -170,6 +170,7 @@
 - https://chrome.google.com/webstore/detail/angular-devtools/
 - log4js
 - Chrome Angular DevTools
+- Logging: ngx-logger
 
 ### Dependency Injection in Ng
 
